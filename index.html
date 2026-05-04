@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KKL 2D PRO - V13 FINAL</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: #020617; color: #fff; display: flex; justify-content: center; min-height: 100vh; overflow: hidden; }
+
+        /* --- SPLASH --- */
+        #splash { position: fixed; inset: 0; background: radial-gradient(circle, #1e293b, #020617); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; }
+        .k-logo { font-size: 100px; font-weight: 900; font-style: italic; background: linear-gradient(135deg, #fbbf24, #fff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 30px rgba(251, 191, 36, 0.4)); animation: pulseK 2s infinite; }
+        @keyframes pulseK { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.05); opacity: 1; } }
+        .load-w { width: 150px; height: 3px; background: rgba(255,255,255,0.05); border-radius: 10px; margin-top: 20px; overflow: hidden; }
+        .prog { width: 0%; height: 100%; background: #fbbf24; animation: load 2s forwards; }
+        @keyframes load { to { width: 100%; } }
+
+        /* --- MAIN --- */
+        .app-card { background: #0f172a; width: 360px; height: 100vh; border: 1px solid rgba(255, 255, 255, 0.1); overflow-y: auto; display: none; }
+        .nav { display: flex; gap: 4px; padding: 12px; background: rgba(15, 23, 42, 0.95); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(10px); }
+        .nav-btn { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); color: #64748b; padding: 10px 5px; border-radius: 12px; cursor: pointer; font-size: 9px; font-weight: bold; flex: 1; text-align: center; }
+        .nav-btn.active { background: #fbbf24; color: #000; border-color: #fbbf24; }
+
+        .page { display: none; padding: 0 15px 30px; animation: fadeInUp 0.4s ease; }
+        .page.active { display: block; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; } }
+
+        /* --- UI COMPONENTS --- */
+        .k-s { font-size: 40px; font-weight: 900; font-style: italic; background: linear-gradient(135deg, #fbbf24, #fff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 10px 0; }
+        .live-panel { background: linear-gradient(145deg, #1e293b, #0f172a); border-radius: 25px; padding: 20px; border: 1px solid rgba(251, 191, 36, 0.15); margin-bottom: 15px; text-align: center; }
+        .val-live { font-size: 65px; font-weight: 950; color: #fbbf24; line-height: 1; margin: 10px 0; }
+        .pulse { animation: pAnim 1.5s infinite; }
+        @keyframes pAnim { 50% { opacity: 0.4; } }
+
+        /* SET & VALUE DISPLAY */
+        .set-val-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 10px; }
+        .sv-box { text-align: center; }
+        .sv-label { font-size: 8px; color: #64748b; display: block; }
+        .sv-num { font-size: 14px; font-weight: bold; color: #fff; }
+
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 15px; }
+        .item { background: rgba(255, 255, 255, 0.02); border-radius: 15px; padding: 12px; border: 1px solid rgba(255, 255, 255, 0.05); }
+        .lbl { font-size: 9px; color: #475569; text-transform: uppercase; margin-bottom: 4px; display: block; }
+        .val-s { font-size: 18px; font-weight: 800; color: #fff; }
+        
+        .header { font-size: 10px; color: #fbbf24; letter-spacing: 1.5px; margin: 15px 0 10px; border-left: 3px solid #fbbf24; padding-left: 8px; text-align: left; }
+        
+        select, .in { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid rgba(251, 191, 36, 0.2); background: #020617; color: #fff; outline: none; text-align: center; }
+        .btn { background: linear-gradient(90deg, #8b5cf6, #ec4899); color: white; border: none; padding: 14px; width: 100%; border-radius: 15px; font-weight: 900; cursor: pointer; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+<div id="splash">
+    <div class="k-logo">K</div>
+    <div class="load-w"><div class="prog"></div></div>
+</div>
+
+<div class="app-card" id="main-app">
+    <div class="nav">
+        <div class="nav-btn active" onclick="showPage('live-page', this)">LIVE</div>
+        <div class="nav-btn" onclick="showPage('calc-page', this)">CALC</div>
+        <div class="nav-btn" onclick="showPage('dream-page', this)">DREAM</div>
+        <div class="nav-btn" onclick="showPage('history-page', this)">HISTORY</div>
+    </div>
+
+    <div id="live-page" class="page active">
+        <div class="k-s">K</div>
+        <select id="day-select" onchange="saveAstro()" style="margin-bottom:10px;">
+            <option value="">နေ့နံရွေးချယ်ပါ</option>
+            <option value="တနင်္ဂနွေ">တနင်္ဂနွေ</option><option value="တနင်္လာ">တနင်္လာ</option><option value="အင်္ဂါ">အင်္ဂါ</option><option value="ဗုဒ္ဓဟူး">ဗုဒ္ဓဟူး</option><option value="ကြာသပတေး">ကြာသပတေး</option><option value="သောကြာ">သောကြာ</option><option value="စနေ">စနေ</option>
+        </select>
+        <div id="astro-msg" style="font-size:10px; color:#fbbf24; margin-bottom:15px;">...</div>
+
+        <div class="live-panel">
+            <span class="lbl" style="color:#fbbf24;">2D LIVE</span>
+            <div id="twod-num" class="val-live pulse">--</div>
+            <div class="set-val-grid">
+                <div class="sv-box"><span class="sv-label">SET</span><div id="set-num" class="sv-num">--</div></div>
+                <div class="sv-box"><span class="sv-label">VALUE</span><div id="val-num" class="sv-num">--</div></div>
+            </div>
+        </div>
+
+        <div class="header">Results</div>
+        <div class="grid">
+            <div class="item"><span class="lbl">12:01 PM</span><div id="res-1201" class="val-s">--</div></div>
+            <div class="item"><span class="lbl">04:30 PM</span><div id="res-430" class="val-s">--</div></div>
+        </div>
+
+        <div class="header">Market Modern</div>
+        <div class="grid">
+            <div class="item"><span class="lbl">9:30 AM</span><div id="mod-930" class="val-s" style="color:#fbbf24;">--</div></div>
+            <div class="item"><span class="lbl">2:00 PM</span><div id="mod-200" class="val-s" style="color:#fbbf24;">--</div></div>
+        </div>
+
+        <button class="btn" onclick="vibrate()">GET LUCKY NUMBER</button>
+        <div id="clock" style="margin-top:15px; font-size:12px; color:#475569; font-weight:bold;">00:00:00</div>
+    </div>
+
+    <div id="calc-page" class="page">
+        <div class="header">2D Calculator</div>
+        <input type="number" id="morning-num" class="in" placeholder="ဂဏန်းရိုက်ပါ" oninput="calculate2D()">
+        <div class="grid" style="margin-top:15px;">
+            <div class="item"><span class="lbl">ဝမ်းချိန်း</span><div id="calc-one" class="val-s" style="color:#fbbf24;">--</div></div>
+            <div class="item"><span class="lbl">ဘရိတ်</span><div id="calc-break" class="val-s" style="color:#fbbf24;">--</div></div>
+            <div class="item"><span class="lbl">ပါဝါ</span><div id="calc-power" class="val-s">--</div></div>
+            <div class="item"><span class="lbl">နက္ခတ်</span><div id="calc-star" class="val-s">--</div></div>
+        </div>
+    </div>
+
+    <div id="dream-page" class="page">
+        <div class="header">Dream Book (၁၀၀ ကျော်)</div>
+        <input type="text" id="dream-search" class="in" placeholder="ရှာဖွေရန်..." onkeyup="searchDream()">
+        <div id="dream-result" style="margin-top:15px;"></div>
+    </div>
+
+    <div id="history-page" class="page">
+        <div class="header">Past Records</div>
+        <div id="history-content"></div>
+    </div>
+</div>
+
+<script>
+    const dreamData = { "မြွေ": "၀၅၊ ၄၅၊ ၈၅", "ရွှေ": "၁၈၊ ၅၄၊ ၉၀", "ရေ": "၁၀၊ ၆၀", "ငါး": "၀၄၊ ၄၄", "ဘုရား": "၀၉၊ ၅၉၊ ၉၉", "ငွေ": "၀၇၊ ၃၇၊ ၆၇", "မိကျောင်း": "၃၇၊ ၉၇", "လူသေ": "၀၀၊ ၄၀၊ ၉၀", "မီး": "၀၃၊ ၄၃၊ ၈၃", "ရဲ": "၁၂၊ ၅၂၊ ၉၂", "ကား": "၁၃၊ ၅၃၊ ၉၃", "အိမ်သာ": "၀၆၊ ၄၆၊ ၈၆", "သွေး": "၂၉၊ ၆၉", "ခွေး": "၁၁၊ ၅၁၊ ၉၁", "ကြောင်": "၁၄၊ ၅၄၊ ၉၄", "နေ": "၀၇၊ ၄၇", "လ": "၀၃၊ ၅၃", "ကျား": "၀၁၊ ၄၁", "ဆင်": "၁၇၊ ၅၇၊ ၉၇", "နွား": "၀၄၊ ၄၄၊ ၈၄", "ကြက်": "၀၉၊ ၄၉၊ ၈၉", "ဝက်": "၀၇၊ ၄၇၊ ၈၇", "ပိုက်ဆံ": "၀၇၊ ၃၇၊ ၆၇", "ရှေ့နေ": "၀၆၊ ၄၆", "မင်္ဂလာဆောင်": "၁၃၊ ၄၃", "ကလေး": "၀၁၊ ၁၁", "ကျောင်း": "၀၈၊ ၄၈", "သရဲ": "၀၇၊ ၀၀", "သင်္ဘော": "၁၆၊ ၅၆", "လေယာဉ်": "၁၈၊ ၅၈", "စက်ဘီး": "၀၂၊ ၄၂", "ဆိုင်ကယ်": "၁၂၊ ၅၂", "ခရီး": "၁၉၊ ၄၉", "ဓား": "၀၁၊ ၄၁", "သေနတ်": "၁၈၊ ၅၈", "ရန်ဖြစ်": "၀၃၊ ၄၃", "ငို": "၀၂၊ ၄၂", "ရယ်": "၀၈၊ ၄၈", "စား": "၀၆၊ ၄၆", "သောက်": "၀၉၊ ၄၉", "အိပ်": "၀၅၊ ၄၅", "ပြေး": "၀၄၊ ၄၄", "ရေကူး": "၀၆၊ ၆၆", "ပျံ": "၀၈၊ ၈၈", "တောင်": "၀၉၊ ၄၉", "တော": "၀၁၊ ၄၁", "လယ်": "၀၄၊ ၄၄", "အိမ်": "၀၇၊ ၄၇", "လမ်း": "၀၂၊ ၄၂", "တံတား": "၀၆၊ ၄၆", "ဈေး": "၀၉၊ ၄၉", "ဆေးရုံ": "၀၃၊ ၄၃", "အကျဉ်းထောင်": "၀၇၊ ၄၇", "စစ်သား": "၁၉၊ ၅၉", "ဆရာဝန်": "၀၃၊ ၄၃", "ဘုန်းကြီး": "၀၉၊ ၄၉", "သီလရှင်": "၀၅၊ ၄၅", "နတ်": "၀၉၊ ၉၉", "လက်ဆောင်": "၀၈၊ ၄၈", "ထီး": "၀၆၊ ၄၆", "မျက်မှန်": "၀၈၊ ၄၈", "နာရီ": "၀၄၊ ၄၄", "ဖုန်း": "၁၅၊ ၅၅", "ကွန်ပျူတာ": "၁၈၊ ၅၈", "စာအုပ်": "၀၁၊ ၄၁", "ကျောက်ခဲ": "၀၅၊ ၄၅", "သဲ": "၀၄၊ ၄၄", "မြေကြီး": "၀၇၊ ၄၇", "စိန်": "၀၉၊ ၅၉", "နဂါး": "၀၉၊ ၅၉", "လိပ်": "၀၄၊ ၄၄", "ယုန်": "၀၄၊ ၄၄", "မျောက်": "၀၉၊ ၄၉" };
+
+    window.onload = () => { setTimeout(() => { document.getElementById('splash').style.display = 'none'; document.getElementById('main-app').style.display = 'block'; }, 2500); };
+
+    function showPage(p, btn) {
+        document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(x => x.classList.remove('active'));
+        document.getElementById(p).classList.add('active');
+        btn.classList.add('active');
+        if(p==='history-page') fetchHistory();
+    }
+
+    async function api() {
+        try {
+            const res = await fetch("https://api.thaistock2d.com/live");
+            const d = await res.json();
+            if(d && d.live) {
+                const m = document.getElementById('twod-num');
+                m.innerText = d.live.twod; m.classList.remove('pulse');
+                document.getElementById('set-num').innerText = d.live.set;
+                document.getElementById('val-num').innerText = d.live.value;
+                document.getElementById('mod-930').innerText = d.live.set.toString().slice(-2);
+                document.getElementById('mod-200').innerText = d.live.set.toString().slice(-2);
+                if(d.result) {
+                    const f = (t) => d.result.find(r => r.time === t)?.twod || "--";
+                    document.getElementById('res-1201').innerText = f("12:01:00");
+                    document.getElementById('res-430').innerText = f("16:30:00");
+                }
+            }
+        } catch(e){}
+    }
+
+    function searchDream() {
+        const v = document.getElementById('dream-search').value;
+        const res = document.getElementById('dream-result');
+        if(!v) { res.innerHTML = ""; return; }
+        for(let k in dreamData) {
+            if(k.includes(v)) {
+                res.innerHTML = `<div class="item"><b>${k}</b><br><span style="font-size:35px; color:#fbbf24; font-weight:900;">${dreamData[k]}</span></div>`;
+                return;
+            }
+        }
+        res.innerHTML = "ရှာမတွေ့ပါ";
+    }
+
+    function calculate2D() {
+        const v = document.getElementById('morning-num').value;
+        if(v.length >= 2) {
+            const n = v.slice(-2);
+            document.getElementById('calc-one').innerText = n[0] + " / " + n[1];
+            document.getElementById('calc-break').innerText = (parseInt(n[0]) + parseInt(n[1])) % 10;
+            const pMap = {0:5,1:6,2:7,3:8,4:9,5:0,6:1,7:2,8:3,9:4};
+            document.getElementById('calc-power').innerText = pMap[n[0]] + "" + pMap[n[1]];
+            const sMap = {0:7,1:8,2:9,3:5,4:6,7:0,8:1,9:2,5:3,6:4};
+            document.getElementById('calc-star').innerText = sMap[n[0]] + "" + sMap[n[1]];
+        }
+    }
+
+    async function fetchHistory() {
+        try {
+            const res = await fetch("https://api.thaistock2d.com/history");
+            const data = await res.json();
+            let h = "";
+            data.slice(0, 10).forEach(r => {
+                h += `<div class="item" style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                    <div style="font-size:10px;">${r.date}</div>
+                    <div style="font-weight:900; color:#fbbf24;">${r.m1201 || '--'} | ${r.e430 || '--'}</div>
+                </div>`;
+            });
+            document.getElementById('history-content').innerHTML = h;
+        } catch(e){}
+    }
+
+    function saveAstro() {
+        const d = document.getElementById('day-select').value;
+        const t = { "တနင်္ဂနွေ": "၁၊ ၆ အပိတ်", "တနင်္လာ": "၂၊ ၇ အပိတ်", "အင်္ဂါ": "၃၊ ၈ အပိတ်", "ဗုဒ္ဓဟူး": "၄၊ ၉ အပိတ်", "ကြာသပတေး": "၅၊ ၀ အပိတ်", "သောကြာ": "၆၊ ၁ အပိတ်", "စနေ": "၇၊ ၂ အပိတ်" };
+        if(d) document.getElementById('astro-msg').innerText = d + " သားအတွက်: " + t[d];
+    }
+
+    function vibrate() { if(navigator.vibrate) navigator.vibrate(50); alert("Lucky: " + Math.floor(Math.random()*100).toString().padStart(2,'0')); }
+
+    setInterval(api, 2000); api();
+    setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
+</script>
+</body>
+</html>
